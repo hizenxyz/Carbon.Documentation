@@ -57,7 +57,7 @@ function getTabTooltip(index: number) {
   <div class="mx-auto max-w-screen-lg px-4 py-8">
     <div class="mb-4 flex flex-col gap-4">
       <h1 class="text-2xl font-bold">Plugin Workshop</h1>
-      <p class="text-slate-500 dark:text-slate-400">Tools to help you create and edit plugins for Carbon.</p>
+      <p>An interactive tool to help you create and edit rust plugins.</p>
     </div>
 
     <div class="mb-5 flex border-b border-white/10 pb-5"></div>
