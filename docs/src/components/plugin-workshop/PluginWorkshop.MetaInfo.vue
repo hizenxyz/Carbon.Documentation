@@ -5,53 +5,62 @@ const {
   pluginData, 
   isVersionValid, 
   isNameValid, 
-  isAuthorValid, 
-  isDescriptionValid 
+  isAuthorValid
 } = usePluginWorkshop()
 </script>
 
 <template>
   <div class="space-y-4 rounded-lg bg-slate-800/50 p-6">
     <div class="r-settings-input-group">
-      <label class="r-settings-input-label">Author</label>
-      <input v-model="pluginData.author" type="text" class="r-settings-custom-input" :class="{ '!border-red-500 focus:!border-red-500': !isAuthorValid }" />
-      <p v-if="!isAuthorValid" class="text-xs text-red-400 mt-2">
-        Author cannot contain double quotes.
-      </p>
-    </div>
-    <div class="r-settings-input-group">
-      <label class="r-settings-input-label">Version</label>
-      <input v-model="pluginData.version" type="text" class="r-settings-custom-input" :class="{ '!border-red-500 focus:!border-red-500': !isVersionValid }" />
-      <p v-if="!isVersionValid" class="text-xs text-red-400 mt-2">
-        Must be in semantic versioning format, e.g., <code>1.2.3</code>
-      </p>
-    </div>
-    <div class="r-settings-input-group">
-      <label class="r-settings-input-label">Name</label>
-      <input v-model="pluginData.name" type="text" class="r-settings-custom-input" :class="{ '!border-red-500 focus:!border-red-500': !isNameValid }" />
+      <label class="r-settings-input-label">Plugin Name</label>
+      <input 
+        v-model="pluginData.name" 
+        type="text" 
+        class="r-settings-custom-input" 
+        :class="{ '!border-red-500 focus:!border-red-500': !isNameValid }"
+        placeholder="MyAwesomePlugin"
+      />
       <p v-if="!isNameValid" class="text-xs text-red-400 mt-2">
         Name cannot contain double quotes and must have at least one valid character (A-Z, 0-9, _).
       </p>
     </div>
+
     <div class="r-settings-input-group">
-      <label class="r-settings-input-label">Description</label>
-      <textarea v-model="pluginData.description" class="r-settings-custom-input" rows="3" :class="{ '!border-red-500 focus:!border-red-500': !isDescriptionValid }"></textarea>
-      <p v-if="!isDescriptionValid" class="text-xs text-red-400 mt-2">
-        Description cannot contain double quotes.
+      <label class="r-settings-input-label">Author</label>
+      <input 
+        v-model="pluginData.author" 
+        type="text" 
+        class="r-settings-custom-input" 
+        :class="{ '!border-red-500 focus:!border-red-500': !isAuthorValid }"
+        placeholder="YourName"
+      />
+      <p v-if="!isAuthorValid" class="text-xs text-red-400 mt-2">
+        Author cannot contain double quotes.
       </p>
     </div>
+
     <div class="r-settings-input-group">
-      <label class="r-settings-input-label">Plugin Type</label>
-      <div class="flex gap-4">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" v-model="pluginData.pluginType" value="Carbon" name="plugin_type" class="radio" />
-          Carbon
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" v-model="pluginData.pluginType" value="Oxide" name="plugin_type" class="radio" />
-          Oxide
-        </label>
-      </div>
+      <label class="r-settings-input-label">Version</label>
+      <input 
+        v-model="pluginData.version" 
+        type="text" 
+        class="r-settings-custom-input" 
+        :class="{ '!border-red-500 focus:!border-red-500': !isVersionValid }"
+        placeholder="1.0.0"
+      />
+      <p v-if="!isVersionValid" class="text-xs text-red-400 mt-2">
+        Must be in semantic versioning format, e.g., <code>1.2.3</code>
+      </p>
+    </div>
+
+    <div class="r-settings-input-group">
+      <label class="r-settings-input-label">Description</label>
+      <textarea 
+        v-model="pluginData.description" 
+        class="r-settings-custom-input" 
+        rows="3"
+        placeholder="A brief description of what your plugin does..."
+      ></textarea>
     </div>
   </div>
 </template>
@@ -84,9 +93,5 @@ const {
 
 .r-settings-custom-input:focus {
   border-color: #888;
-}
-
-.radio {
-  accent-color: var(--vp-c-brand-1);
 }
 </style>

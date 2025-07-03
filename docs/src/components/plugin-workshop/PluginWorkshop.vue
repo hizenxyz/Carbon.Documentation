@@ -13,16 +13,16 @@ const tabsConfig = [
   {
     id: 'meta-info',
     name: 'Meta Info',
-    description: 'Create a default plugin layout from provided basic data.',
+    description: 'Basic information about your plugin.',
     component: PluginMetaInfo
   },
   {
     id: 'layout',
     name: 'Layout',
-    description: 'Design layouts and have the code generated for you.',
+    description: 'Design layouts to be rendered into LUI (Lightweight UI) code. Note: This is not currently supported for Oxide-targeted plugins.',
     component: PluginLayout,
     isDisabled: () => pluginData.value.pluginType === 'Oxide',
-    disabledTooltip: 'Layout builder is not yet supported for Oxide plugins'
+    disabledTooltip: 'Layout builder is only available for Carbon and Hybrid plugins'
   }
 ]
 
@@ -54,48 +54,46 @@ function getTabTooltip(index: number) {
 </script>
 
 <template>
-  <div class="mx-auto max-w-screen-lg px-4 py-8 space-y-6">
+  <div class="mx-auto max-w-screen-lg px-4 py-8">
     <div class="mb-4 flex flex-col gap-4">
       <h1 class="text-2xl font-bold">Plugin Workshop</h1>
-      <p>Tools to help you create and edit plugins for Carbon.</p>
+      <p class="text-slate-500 dark:text-slate-400">Tools to help you create and edit plugins for Carbon.</p>
     </div>
 
-    <div class="r-settings">
-      <div class="mb-5 flex border-b border-white/10 pb-5">
-        <button
-          v-for="(tab, index) in tabs"
-          :key="tabsConfig[index].id"
-          class="r-button"
-          @click="selectTab(index)"
-          :class="{ 
-            toggled: selectedTab == index,
-            disabled: isTabDisabled(index)
-          }"
-          :disabled="isTabDisabled(index)"
-          :title="getTabTooltip(index)"
-        >
-          {{ tab.name }}
-        </button>
+    <div class="mb-5 flex border-b border-white/10 pb-5"></div>
+
+    <div class="mb-4 flex">
+      <button
+        v-for="(tab, index) in tabs"
+        :key="tabsConfig[index].id"
+        class="r-button text-sm"
+        @click="selectTab(index)"
+        :class="{ 
+          toggled: selectedTab == index,
+          disabled: isTabDisabled(index)
+        }"
+        :disabled="isTabDisabled(index)"
+        :title="getTabTooltip(index)"
+      >
+        {{ tab.name }}
+      </button>
+    </div>
+
+      <div class="mb-3 text-sm text-slate-400">
+        <p>{{ tabs[selectedTab].description }}</p>
       </div>
 
       <div>
-        <div class="mb-4 text-sm text-slate-400">
-          <p>{{ tabs[selectedTab].description }}</p>
-        </div>
-
-        <div>
-          <component :is="currentTabConfig.component" />
-        </div>
-
-        <div class="mb-5 flex border-b border-white/10 pb-5"></div>
-
-        <CodeResult />
+        <component :is="currentTabConfig.component" />
       </div>
-    </div>
+
+      <div class="mb-5 flex border-b border-white/10 pb-5"></div>
+
+      <CodeResult />
   </div>
 </template>
 
-<style>
+<style scoped>
 .r-button {
   opacity: 50%;
   background-color: var(--vp-code-copy-code-bg);

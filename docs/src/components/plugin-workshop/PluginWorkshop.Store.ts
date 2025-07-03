@@ -5,7 +5,7 @@ export interface PluginData {
   version: string
   name: string
   description: string
-  pluginType: 'Carbon' | 'Oxide'
+  pluginType: 'Hybrid' | 'Carbon' | 'Oxide'
 }
 
 // Shared reactive data
@@ -14,7 +14,7 @@ export const pluginData = ref<PluginData>({
   version: '1.0.0',
   name: 'MyPlugin',
   description: 'A cool new plugin.',
-  pluginType: 'Carbon'
+  pluginType: 'Hybrid'
 })
 
 // Validation computed properties
@@ -33,21 +33,49 @@ export const isAuthorValid = computed(() => {
 })
 
 export const isDescriptionValid = computed(() => {
-  return !pluginData.value.description.includes('"')
+  // Placeholder for sanitization later
+  // Currently, we're just escaping quotes and backslashes, and turning newlines into spaces
+  return true
 })
 
 // Code generation
 export const generatedCode = computed(() => {
   const sanitizedName = sanitizeName(pluginData.value.name) || 'MyPlugin'
   const info = `[Info("${pluginData.value.name}", "${pluginData.value.author}", "${pluginData.value.version}")]`
-  const desc = pluginData.value.description && `[Description("${pluginData.value.description}")]`
-  const baseClass = pluginData.value.pluginType === 'Carbon' ? 'CarbonPlugin' : 'RustPlugin'
-  const namespace = pluginData.value.pluginType === 'Carbon' ? 'Carbon.Plugins' : 'Oxide.Plugins'
-  const using = ''
+  const escapedDescription = escapeDescription(pluginData.value.description)
+  const desc = pluginData.value.description && `[Description("${escapedDescription}")]`
+  
+  let baseClass: string
+  let namespace: string
+  let using = ``
+  
+  switch (pluginData.value.pluginType) {
+    case 'Carbon':
+      baseClass = 'CarbonPlugin'
+      namespace = 'Carbon.Plugins'
+      using += `using Carbon.Components;`
+      break
+    case 'Oxide':
+      baseClass = 'RustPlugin'
+      namespace = 'Oxide.Plugins'
+      break
+    case 'Hybrid':
+      baseClass = 'RustPlugin'
+      namespace = 'Oxide.Plugins'
+      using += `#if CARBON
+using Carbon.Components;
+#else
+using Oxide.Ext.CarbonAliases;
+#endif
+`
+      break
+  }
 
-  const rawCode = (using && `using ${using};
+  const rawCode = `
+${using}
+using UnityEngine;
 
-`) + `namespace ${namespace};
+namespace ${namespace};
 
 ${info}${desc && `\n${desc}`}
 public class ${sanitizedName} : ${baseClass}
@@ -55,7 +83,7 @@ public class ${sanitizedName} : ${baseClass}
     // Code goes here
 }
 `
-  return rawCode
+  return rawCode.trimStart()
 })
 
 export const codeToHighlight = computed(() => {
@@ -78,6 +106,18 @@ export function sanitizeName(name: string) {
   return sanitized
 }
 
+export function sanitizeDescription(description: string) {
+  let sanitized = description.replace(/[\r\n\s]+/g, ' ')
+  sanitized = sanitized.replace(/[\s]+/g, ' ')
+  return sanitized
+}
+
+export function escapeDescription(description: string) {
+  return description
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/"/g, '\\"')    // Then escape quotes
+}
+
 // Composable hook
 export function usePluginWorkshop() {
   return {
@@ -88,6 +128,7 @@ export function usePluginWorkshop() {
     isDescriptionValid,
     generatedCode,
     codeToHighlight,
-    sanitizeName
+    sanitizeName,
+    escapeDescription
   }
 } 
