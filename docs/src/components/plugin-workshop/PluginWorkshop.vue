@@ -2,31 +2,36 @@
 import { ref, computed } from 'vue'
 import PluginMetaInfo from './PluginWorkshop.MetaInfo.vue'
 import PluginLayout from './PluginWorkshop.Layout.vue'
+import PluginSettings from './PluginWorkshop.Settings.vue'
 import CodeResult from './PluginWorkshop.CodeResult.vue'
 import { usePluginWorkshop } from './PluginWorkshop.Store'
 
 const { pluginData } = usePluginWorkshop()
 const selectedTab = ref(0)
 
-// Dynamic tab configuration
 const tabsConfig = [
   {
     id: 'meta-info',
     name: 'Meta Info',
-    description: 'Basic information about your plugin.',
+    description: 'Basic information and metadata.',
     component: PluginMetaInfo
+  },
+  {
+    id: 'settings',
+    name: 'Settings',
+    description: 'Configuration and options management.',
+    component: PluginSettings
   },
   {
     id: 'layout',
     name: 'Layout',
-    description: 'Design layouts to be rendered into LUI (Lightweight UI) code. Note: This is not currently supported for Oxide-targeted plugins.',
+    description: 'Visual UI components rendered with LUI (Lightweight UI). Not supported for Oxide-targeted builds.',
     component: PluginLayout,
     isDisabled: () => pluginData.value.pluginType === 'Oxide',
     disabledTooltip: 'Layout builder is only available for Carbon and Hybrid plugins'
   }
 ]
 
-// Computed properties for easy access
 const tabs = computed(() => tabsConfig.map(tab => ({
   name: tab.name,
   description: tab.description
@@ -36,7 +41,6 @@ const currentTabConfig = computed(() => tabsConfig[selectedTab.value])
 
 function selectTab(index: number) {
   const tab = tabsConfig[index]
-  // Don't allow selecting disabled tabs
   if (tab.isDisabled?.() ?? false) {
     return
   }
