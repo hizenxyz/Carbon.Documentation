@@ -5,6 +5,7 @@ import { usePluginWorkshop } from './PluginWorkshop.Store'
 import type { Highlighter } from 'shiki'
 import { getSingletonHighlighter } from 'shiki'
 import { shallowRef, provide, readonly, onMounted } from 'vue'
+import { AlertTriangle, Info } from 'lucide-vue-next'
 
 const { pluginData, generatedCode } = usePluginWorkshop()
 
@@ -70,6 +71,37 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- Warning Messages -->
+    <div v-if="pluginData.pluginType === 'Oxide'" class="warning-message warning-message--orange">
+      <div class="flex items-start gap-2">
+        <AlertTriangle :size="20" class="text-orange-500 mt-0.5 flex-shrink-0" />
+        <div>
+          <p class="font-medium">LUI Not Supported</p>
+          <p class="text-sm opacity-90">
+            LUI is not supported in Oxide-targeted plugins and any layouts created will not be applied.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="pluginData.pluginType === 'Hybrid' && pluginData.layout.active" class="warning-message warning-message--blue">
+      <div class="flex items-start gap-2">
+        <Info :size="20" class="text-blue-500 mt-0.5 flex-shrink-0" />
+        <div>
+          <p class="font-medium">Carbon Aliases Required</p>
+          <p class="text-sm opacity-90">
+            The <a 
+              href="https://codefling.com/extensions/carbon-aliases" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-blue-400 hover:text-blue-300 underline"
+            >Carbon Aliases</a> extension is required for layouts to work on Oxide servers.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Block -->
     <Transition name="expand">
       <CodeBlock 
         v-if="isCodeExpanded" 
@@ -100,6 +132,32 @@ onMounted(async () => {
   opacity: 100%;
   background-color: var(--vp-button-alt-bg);
   border-bottom: 2px solid #ffffff29;
+}
+
+.warning-message {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid;
+}
+
+.warning-message--orange {
+  background-color: rgba(251, 146, 60, 0.1);
+  border-left-color: rgb(251, 146, 60);
+  color: rgb(251, 146, 60);
+}
+
+.warning-message--blue {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left-color: rgb(59, 130, 246);
+  color: rgb(59, 130, 246);
+}
+
+:global(.dark) .warning-message--orange {
+  background-color: rgba(251, 146, 60, 0.15);
+}
+
+:global(.dark) .warning-message--blue {
+  background-color: rgba(59, 130, 246, 0.15);
 }
 
 .expand-enter-active,
