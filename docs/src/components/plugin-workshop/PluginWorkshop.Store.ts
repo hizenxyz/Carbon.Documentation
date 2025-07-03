@@ -6,6 +6,11 @@ export interface PluginData {
   name: string
   description: string
   pluginType: 'Hybrid' | 'Carbon' | 'Oxide'
+  layout: LayoutData
+}
+
+export interface LayoutData {
+  active: boolean
 }
 
 // Shared reactive data
@@ -14,7 +19,10 @@ export const pluginData = ref<PluginData>({
   version: '1.0.0',
   name: 'MyPlugin',
   description: 'A cool new plugin.',
-  pluginType: 'Hybrid'
+  pluginType: 'Hybrid',
+  layout: {
+    active: false
+  }
 })
 
 // Validation computed properties
@@ -62,12 +70,12 @@ export const generatedCode = computed(() => {
     case 'Hybrid':
       baseClass = 'RustPlugin'
       namespace = 'Oxide.Plugins'
-      using += `#if CARBON
+      using += pluginData.value.layout.active ? `#if CARBON
 using Carbon.Components;
 #else
 using Oxide.Ext.CarbonAliases;
 #endif
-`
+` : ''
       break
   }
 
