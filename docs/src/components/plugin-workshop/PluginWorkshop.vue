@@ -1,32 +1,78 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import PluginGenerator from './PluginWorkshop.Generator.vue'
-import LayoutBuilder from './PluginWorkshop.LayoutBuilder.vue'
+import { ref, computed } from 'vue'
+import PluginMetaInfo from './PluginWorkshop.MetaInfo.vue'
+import PluginLayout from './PluginWorkshop.Layout.vue'
+import CodeResult from './PluginWorkshop.CodeResult.vue'
+import { usePluginWorkshop } from './PluginWorkshop.Store'
 
+const { pluginData } = usePluginWorkshop()
 const selectedTab = ref(0)
-const tabs = [
-  { name: 'Plugin Generator', description: 'Create a default plugin layout from provided basic data.' },
-  { name: 'Layout Builder', description: 'Design layouts and have the code generated for you.' }
+
+// Dynamic tab configuration
+const tabsConfig = [
+  {
+    id: 'meta-info',
+    name: 'Meta Info',
+    description: 'Create a default plugin layout from provided basic data.',
+    component: PluginMetaInfo
+  },
+  {
+    id: 'layout',
+    name: 'Layout',
+    description: 'Design layouts and have the code generated for you.',
+    component: PluginLayout,
+    isDisabled: () => pluginData.value.pluginType === 'Oxide',
+    disabledTooltip: 'Layout builder is not yet supported for Oxide plugins'
+  }
 ]
+
+// Computed properties for easy access
+const tabs = computed(() => tabsConfig.map(tab => ({
+  name: tab.name,
+  description: tab.description
+})))
+
+const currentTabConfig = computed(() => tabsConfig[selectedTab.value])
+
+function selectTab(index: number) {
+  const tab = tabsConfig[index]
+  // Don't allow selecting disabled tabs
+  if (tab.isDisabled?.() ?? false) {
+    return
+  }
+  selectedTab.value = index
+}
+
+function isTabDisabled(index: number) {
+  return tabsConfig[index].isDisabled?.() ?? false
+}
+
+function getTabTooltip(index: number) {
+  const tab = tabsConfig[index]
+  return (tab.isDisabled?.() ?? false) ? (tab.disabledTooltip || '') : ''
+}
 </script>
 
 <template>
   <div class="mx-auto max-w-screen-lg px-4 py-8 space-y-6">
-    <div>
-      <h1 class="text-3xl font-bold">Plugin Workshop</h1>
-      <p class="text-lg text-slate-500 dark:text-slate-400">
-        Tools to help you create and edit plugins for Carbon.
-      </p>
+    <div class="mb-4 flex flex-col gap-4">
+      <h1 class="text-2xl font-bold">Plugin Workshop</h1>
+      <p>Tools to help you create and edit plugins for Carbon.</p>
     </div>
 
     <div class="r-settings">
       <div class="mb-5 flex border-b border-white/10 pb-5">
         <button
           v-for="(tab, index) in tabs"
-          :key="index"
+          :key="tabsConfig[index].id"
           class="r-button"
-          @click="selectedTab = index"
-          :class="{ toggled: selectedTab == index }"
+          @click="selectTab(index)"
+          :class="{ 
+            toggled: selectedTab == index,
+            disabled: isTabDisabled(index)
+          }"
+          :disabled="isTabDisabled(index)"
+          :title="getTabTooltip(index)"
         >
           {{ tab.name }}
         </button>
@@ -38,13 +84,12 @@ const tabs = [
         </div>
 
         <div>
-          <div v-if="selectedTab === 0">
-            <PluginGenerator />
-          </div>
-          <div v-else-if="selectedTab === 1">
-            <LayoutBuilder />
-          </div>
+          <component :is="currentTabConfig.component" />
         </div>
+
+        <div class="mb-5 flex border-b border-white/10 pb-5"></div>
+
+        <CodeResult />
       </div>
     </div>
   </div>
@@ -71,6 +116,16 @@ const tabs = [
   opacity: 100%;
   background-color: var(--vp-button-alt-bg);
   border-bottom: 2px solid #ffffff29;
+}
+
+.r-button.disabled {
+  opacity: 25%;
+  cursor: not-allowed;
+}
+
+.r-button.disabled:hover {
+  opacity: 25%;
+  background-color: var(--vp-code-copy-code-bg);
 }
 
 .r-settings {
