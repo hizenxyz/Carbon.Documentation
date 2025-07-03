@@ -21,9 +21,11 @@ export const pluginData = ref<PluginData>({
   description: 'A cool new plugin.',
   pluginType: 'Hybrid',
   layout: {
-    active: false
-  }
+    active: false,
+  },
 })
+
+export const className = computed(() => sanitizeName(pluginData.value.name) || 'MyPlugin')
 
 export const isVersionValid = computed(() => {
   return /^\d+\.\d+(\.\d+)?$/.test(pluginData.value.version)
@@ -44,14 +46,14 @@ export const isDescriptionValid = computed(() => {
 })
 
 export const generatedCode = computed(() => {
-  return generateCode(pluginData.value)
+  return generateCode()
 })
 
 export const codeToHighlight = computed(() => {
   return generatedCode.value.substring(generatedCode.value.indexOf('using'))
 })
 
-export function sanitizeName(name: string) {
+export function sanitizeName(name: string): string {
   let sanitized = name.replace(/[^a-zA-Z0-9_]/g, '_')
   
   if (/^[0-9]/.test(sanitized)) {
@@ -78,6 +80,7 @@ export function escapeDescription(description: string) {
 export function usePluginWorkshop() {
   return {
     pluginData,
+    className,
     isVersionValid,
     isNameValid,
     isAuthorValid,

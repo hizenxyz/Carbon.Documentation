@@ -1,5 +1,5 @@
-import type { PluginData } from '../PluginWorkshop.Store'
+import { pluginData } from '../PluginWorkshop.Store'
 
-export function generateLayoutCode(data: PluginData): string {
+export function generateLayoutCode(): string {
   return ''
 }

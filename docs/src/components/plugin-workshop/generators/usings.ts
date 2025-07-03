@@ -1,16 +1,14 @@
-import type { PluginData } from '../PluginWorkshop.Store'
+import { pluginData } from '../PluginWorkshop.Store'
 
-export function generateUsings(data: PluginData): string {
+export function generateUsings(): string {
   const usings: string[] = []
   
-  switch (data.pluginType) {
+  switch (pluginData.value.pluginType) {
     case 'Carbon':
-      if (data.layout.active) {
-        usings.push('using Carbon.Components;')
-      }
+      usings.push('using Carbon.Components;')
       break
     case 'Hybrid':
-      if (data.layout.active) {
+      if (pluginData.value.layout.active) {
         usings.push('#if CARBON')
         usings.push('using Carbon.Components;')
         usings.push('#else')
