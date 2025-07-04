@@ -51,7 +51,7 @@ export const csharpTypeValidators: Record<CSharpType, RegExp> = {
   uint: /^\d+[uU]?$/,
   ushort: /^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3}|0)$/,
   ulong: /^\d+([uU][lL]|[lL][uU])?$/,
-  char: /^(\\(?:['"\\0abfnrtv]|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|x[0-9a-fA-F]{1,4})|[^\\])$/  // Single character (not backslash) OR valid escape sequence
+  char: /^(\\(?:['"\\0abfnrtv]|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|x[0-9a-fA-F]{1,4})|[^\\])$/
 }
 
 export const csharpTypeDefaults: Record<CSharpType, string> = {
@@ -172,50 +172,8 @@ export function escapeDescription(description: string) {
 }
 
 export function usePluginWorkshop() {
-  const addSetting = () => {
-    const baseName = 'MySetting'
-    let uniqueName = baseName
-    let counter = 1
-    
-    while (pluginData.value.settings.some(setting => setting.name === uniqueName)) {
-      uniqueName = `${baseName}${counter}`
-      counter++
-    }
-
-    const newSetting: SettingType = {
-      id: crypto.randomUUID(),
-      name: uniqueName,
-      type: 'string',
-      description: '',
-      defaultValue: ''
-    }
-    pluginData.value.settings.push(newSetting)
-  }
-
-  const removeSetting = (id: string) => {
-    const index = pluginData.value.settings.findIndex(s => s.id === id)
-    if (index !== -1) {
-      pluginData.value.settings.splice(index, 1)
-    }
-  }
-
-  const updateSettingType = (id: string, newType: CSharpType) => {
-    const setting = pluginData.value.settings.find(s => s.id === id)
-    if (setting) {
-      setting.type = newType
-      setting.defaultValue = ''
-    }
-  }
-
   const validateSettingValue = (type: CSharpType, value: string): boolean => {
     return csharpTypeValidators[type].test(value)
-  }
-
-  const reorderSettings = (fromIndex: number, toIndex: number) => {
-    const settings = [...pluginData.value.settings]
-    const [movedItem] = settings.splice(fromIndex, 1)
-    settings.splice(toIndex, 0, movedItem)
-    pluginData.value.settings = settings
   }
 
   const clearStoredData = () => {
@@ -238,11 +196,7 @@ export function usePluginWorkshop() {
     codeToHighlight,
     sanitizeName,
     escapeDescription,
-    addSetting,
-    removeSetting,
-    updateSettingType,
     validateSettingValue,
-    reorderSettings,
     clearStoredData,
     csharpTypeValidators,
     csharpTypeDefaults
