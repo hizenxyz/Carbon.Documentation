@@ -10,7 +10,7 @@ const {
 </script>
 
 <template>
-  <div class="space-y-4 rounded-lg bg-slate-800/50 p-6">
+  <div class="space-y-4 rounded-lg border border-slate-700 bg-slate-800/50 p-4">
     <div class="r-settings-input-group">
       <label class="r-settings-input-label">Plugin Name</label>
       <input 

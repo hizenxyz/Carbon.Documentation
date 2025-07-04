@@ -1,5 +1,28 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { generateCode } from './generators'
+
+export type CSharpType = 
+  | 'string' 
+  | 'int' 
+  | 'float' 
+  | 'double' 
+  | 'bool' 
+  | 'decimal' 
+  | 'byte' 
+  | 'short' 
+  | 'long' 
+  | 'uint' 
+  | 'ushort' 
+  | 'ulong' 
+  | 'char'
+
+export interface SettingType {
+  id: string
+  name: string
+  type: CSharpType
+  description: string
+  defaultValue: string
+}
 
 export interface PluginData {
   author: string
@@ -8,13 +31,46 @@ export interface PluginData {
   description: string
   pluginType: 'Hybrid' | 'Carbon' | 'Oxide'
   layout: LayoutData
+  settings: SettingType[]
 }
 
 export interface LayoutData {
   active: boolean
 }
 
-export const pluginData = ref<PluginData>({
+export const csharpTypeValidators: Record<CSharpType, RegExp> = {
+  string: /^.*$/,
+  int: /^-?\d+$/,
+  float: /^-?\d+(\.\d+)?[fF]?$/,
+  double: /^-?\d+(\.\d+)?[dD]?$/,
+  bool: /^(true|false)$/i,
+  decimal: /^-?\d+(\.\d+)?[mM]?$/,
+  byte: /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+  short: /^-?(3276[0-8]|327[0-5][0-9]|32[0-6][0-9]{2}|3[01][0-9]{3}|[12][0-9]{4}|[1-9][0-9]{0,3}|0)$/,
+  long: /^-?\d+[lL]?$/,
+  uint: /^\d+[uU]?$/,
+  ushort: /^(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{0,3}|0)$/,
+  ulong: /^\d+([uU][lL]|[lL][uU])?$/,
+  char: /^(\\(?:['"\\0abfnrtv]|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|x[0-9a-fA-F]{1,4})|[^\\])$/  // Single character (not backslash) OR valid escape sequence
+}
+
+export const csharpTypeDefaults: Record<CSharpType, string> = {
+  string: '',
+  int: '0',
+  float: '0.0',
+  double: '0.0',
+  bool: 'false',
+  decimal: '0.0',
+  byte: '0',
+  short: '0',
+  long: '0',
+  uint: '0',
+  ushort: '0',
+  ulong: '0',
+  char: ''
+}
+
+const defaultPluginData: PluginData = {
   author: 'YourName',
   version: '1.0.0',
   name: 'MyPlugin',
@@ -23,7 +79,46 @@ export const pluginData = ref<PluginData>({
   layout: {
     active: false,
   },
-})
+  settings: []
+}
+
+const STORAGE_KEY = 'carbon-plugin-workshop-data'
+
+const loadPluginData = (): PluginData => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return {
+        ...defaultPluginData,
+        ...parsed,
+        layout: { ...defaultPluginData.layout, ...parsed.layout },
+        settings: parsed.settings || []
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load plugin data from localStorage:', error)
+  }
+  return { ...defaultPluginData }
+}
+
+const savePluginData = (data: PluginData) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  } catch (error) {
+    console.warn('Failed to save plugin data to localStorage:', error)
+  }
+}
+
+export const pluginData = ref<PluginData>(loadPluginData())
+
+watch(
+  pluginData,
+  (newData) => {
+    savePluginData(newData)
+  },
+  { deep: true }
+)
 
 export const className = computed(() => sanitizeName(pluginData.value.name) || 'MyPlugin')
 
@@ -41,7 +136,6 @@ export const isAuthorValid = computed(() => {
 })
 
 export const isDescriptionValid = computed(() => {
-  // Placeholder for sanitization later
   return true
 })
 
@@ -78,6 +172,61 @@ export function escapeDescription(description: string) {
 }
 
 export function usePluginWorkshop() {
+  const addSetting = () => {
+    const baseName = 'MySetting'
+    let uniqueName = baseName
+    let counter = 1
+    
+    while (pluginData.value.settings.some(setting => setting.name === uniqueName)) {
+      uniqueName = `${baseName}${counter}`
+      counter++
+    }
+
+    const newSetting: SettingType = {
+      id: crypto.randomUUID(),
+      name: uniqueName,
+      type: 'string',
+      description: '',
+      defaultValue: ''
+    }
+    pluginData.value.settings.push(newSetting)
+  }
+
+  const removeSetting = (id: string) => {
+    const index = pluginData.value.settings.findIndex(s => s.id === id)
+    if (index !== -1) {
+      pluginData.value.settings.splice(index, 1)
+    }
+  }
+
+  const updateSettingType = (id: string, newType: CSharpType) => {
+    const setting = pluginData.value.settings.find(s => s.id === id)
+    if (setting) {
+      setting.type = newType
+      setting.defaultValue = ''
+    }
+  }
+
+  const validateSettingValue = (type: CSharpType, value: string): boolean => {
+    return csharpTypeValidators[type].test(value)
+  }
+
+  const reorderSettings = (fromIndex: number, toIndex: number) => {
+    const settings = [...pluginData.value.settings]
+    const [movedItem] = settings.splice(fromIndex, 1)
+    settings.splice(toIndex, 0, movedItem)
+    pluginData.value.settings = settings
+  }
+
+  const clearStoredData = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+      Object.assign(pluginData.value, { ...defaultPluginData })
+    } catch (error) {
+      console.warn('Failed to clear stored plugin data:', error)
+    }
+  }
+
   return {
     pluginData,
     className,
@@ -88,6 +237,14 @@ export function usePluginWorkshop() {
     generatedCode,
     codeToHighlight,
     sanitizeName,
-    escapeDescription
+    escapeDescription,
+    addSetting,
+    removeSetting,
+    updateSettingType,
+    validateSettingValue,
+    reorderSettings,
+    clearStoredData,
+    csharpTypeValidators,
+    csharpTypeDefaults
   }
 }
