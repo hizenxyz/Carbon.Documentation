@@ -134,7 +134,7 @@ export function generateSettingsCode(): string {
         ${settings.map(setting => {
           const defaultValue = formatDefaultValue(setting)
           const displayName = getDisplayName(setting)
-          return `[JsonPropertyName("${displayName}")]
+          return `[JsonProperty("${displayName}")]
         public ${setting.type} ${setting.name} { get; set; } = ${defaultValue};`
         }).join('\n\n        ')}
     }

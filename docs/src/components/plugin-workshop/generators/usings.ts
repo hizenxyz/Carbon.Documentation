@@ -3,9 +3,16 @@ import { pluginData } from '../PluginWorkshop.Store'
 export function generateUsings(): string {
   const usings: string[] = []
   
+  if (pluginData.value.settings.length > 0) {
+    usings.push('using Newtonsoft.Json;')
+    usings.push('using System;')
+  }
+
   switch (pluginData.value.pluginType) {
     case 'Carbon':
-      usings.push('using Carbon.Components;')
+      if (pluginData.value.layout.active) {
+        usings.push('using Carbon.Components;')
+      }
       break
     case 'Hybrid':
       if (pluginData.value.layout.active) {
@@ -18,5 +25,7 @@ export function generateUsings(): string {
       break
   }
   
-  return usings.length > 0 ? usings.join('\n') + '\n' : ''
+  const uniqueUsings = [...new Set(usings)].sort()
+
+  return uniqueUsings.length > 0 ? uniqueUsings.join('\n') : ''
 }
