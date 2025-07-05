@@ -76,26 +76,9 @@ onMounted(async () => {
       <div class="flex items-start gap-2">
         <AlertTriangle :size="20" class="text-orange-500 mt-0.5 flex-shrink-0" />
         <div>
-          <p class="font-medium">LUI Not Supported</p>
+          <p class="font-medium">Potential Performance Loss</p>
           <p class="text-sm opacity-90">
-            LUI is not supported in Oxide-targeted plugins and any layouts created will not be applied.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="pluginData.pluginType === 'Hybrid' && pluginData.layout.active" class="warning-message warning-message--blue">
-      <div class="flex items-start gap-2">
-        <Info :size="20" class="text-blue-500 mt-0.5 flex-shrink-0" />
-        <div>
-          <p class="font-medium">Carbon Aliases Required</p>
-          <p class="text-sm opacity-90">
-            The <a 
-              href="https://codefling.com/extensions/carbon-aliases" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="text-blue-400 hover:text-blue-300 underline"
-            >Carbon Aliases</a> extension is required for layouts to work on Oxide servers.
+            Consider using Carbon + Oxide plugins to enable performance enhancements when your plugin is used on Carbon servers.
           </p>
         </div>
       </div>

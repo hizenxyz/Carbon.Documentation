@@ -60,8 +60,6 @@ const removeItem = (index: number) => {
   }
 }
 
-
-
 const runValidation = () => {
   const results: Record<string, { isValid: boolean; errors: string[] }> = {}
   
@@ -117,8 +115,6 @@ const getValidationErrors = (index: number): string[] => {
   return result ? result.errors : []
 }
 
-
-
 const updateField = (index: number, fieldKey: string, value: unknown) => {
   const newItems = [...items.value]
   newItems[index] = { ...newItems[index], [fieldKey]: value }
@@ -127,6 +123,25 @@ const updateField = (index: number, fieldKey: string, value: unknown) => {
 
 const getFieldPlaceholder = (field: FieldConfig, item: unknown): string => {
   return field.dynamicPlaceholder ? field.dynamicPlaceholder(item) : (field.placeholder || '')
+}
+
+const getColSpanClass = (field: FieldConfig): string => {
+  const span = field.colSpan || 3
+  switch (span) {
+    case 1: return 'col-span-1'
+    case 2: return 'col-span-2'
+    case 3: return 'col-span-3'
+    case 4: return 'col-span-4'
+    case 5: return 'col-span-5'
+    case 6: return 'col-span-6'
+    case 7: return 'col-span-7'
+    case 8: return 'col-span-8'
+    case 9: return 'col-span-9'
+    case 10: return 'col-span-10'
+    case 11: return 'col-span-11'
+    case 12: return 'col-span-12'
+    default: return 'col-span-3'
+  }
 }
 </script>
 
@@ -167,68 +182,68 @@ const getFieldPlaceholder = (field: FieldConfig, item: unknown): string => {
           <GripVertical class="h-5 w-5 text-slate-400" />
         </div>
 
-        <div class="grid grid-cols-12 gap-4 items-start ml-6">
-        <div
-          v-for="field in config.fields"
-          :key="field.key"
-          :class="`col-span-${field.colSpan || 3}`"
-        >
-          <label class="r-settings-input-label">
-            {{ field.label }}
-            <span v-if="field.required" class="text-red-400">*</span>
-          </label>
-          
-          <input
-            v-if="field.type === 'text'"
-            :value="item[field.key]"
-            @input="updateField(index, field.key, ($event.target as HTMLInputElement).value)"
-            type="text"
-            :placeholder="getFieldPlaceholder(field, item)"
-            class="r-settings-custom-input"
-            :class="{ '!border-red-500 focus:!border-red-500': !isValidItem(index) }"
-          />
-          
-          <select
-            v-else-if="field.type === 'select'"
-            :value="item[field.key]"
-            @change="updateField(index, field.key, ($event.target as HTMLSelectElement).value)"
-            class="r-settings-custom-input"
+        <div class="grid grid-cols-12 gap-2 items-start ml-4">
+          <div
+            v-for="field in config.fields"
+            :key="field.key"
+            :class="getColSpanClass(field)"
           >
-            <option v-for="option in field.options" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-          
-          <div v-else-if="field.type === 'checkbox'" class="flex items-center pt-2">
+            <label class="r-settings-input-label">
+              {{ field.label }}
+              <span v-if="field.required" class="text-red-400">*</span>
+            </label>
+            
             <input
-              :checked="item[field.key]"
-              @change="updateField(index, field.key, ($event.target as HTMLInputElement).checked)"
-              type="checkbox"
-              class="rounded border-slate-600 text-blue-600 focus:ring-blue-500"
-              style="background-color: #1a1a1a;"
+              v-if="field.type === 'text'"
+              :value="item[field.key]"
+              @input="updateField(index, field.key, ($event.target as HTMLInputElement).value)"
+              type="text"
+              :placeholder="getFieldPlaceholder(field, item)"
+              class="r-settings-custom-input"
+              :class="{ '!border-red-500 focus:!border-red-500': !isValidItem(index) }"
             />
-            <span class="ml-2 text-sm text-slate-300">{{ item[field.key] ? 'Yes' : 'No' }}</span>
+            
+            <select
+              v-else-if="field.type === 'select'"
+              :value="item[field.key]"
+              @change="updateField(index, field.key, ($event.target as HTMLSelectElement).value)"
+              class="r-settings-custom-input"
+            >
+              <option v-for="option in field.options" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            
+            <div v-else-if="field.type === 'checkbox'" class="flex items-center pt-2">
+              <input
+                :checked="item[field.key]"
+                @change="updateField(index, field.key, ($event.target as HTMLInputElement).checked)"
+                type="checkbox"
+                class="rounded border-slate-600 text-blue-600 focus:ring-blue-500"
+                style="background-color: #1a1a1a;"
+              />
+              <span class="ml-2 text-sm text-slate-300">{{ item[field.key] ? 'Yes' : 'No' }}</span>
+            </div>
+            
+            <textarea
+              v-else-if="field.type === 'textarea'"
+              :value="item[field.key]"
+              @input="updateField(index, field.key, ($event.target as HTMLTextAreaElement).value)"
+              :placeholder="getFieldPlaceholder(field, item)"
+              class="r-settings-custom-input"
+              rows="3"
+            ></textarea>
           </div>
-          
-          <textarea
-            v-else-if="field.type === 'textarea'"
-            :value="item[field.key]"
-            @input="updateField(index, field.key, ($event.target as HTMLTextAreaElement).value)"
-            :placeholder="getFieldPlaceholder(field, item)"
-            class="r-settings-custom-input"
-            rows="3"
-          ></textarea>
-        </div>
 
-        <div class="col-span-1 flex justify-end">
-          <button
-            @click="removeItem(index)"
-            class="mt-6 rounded-md p-2 text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors"
-            title="Remove item"
-          >
-            <Trash2 class="h-4 w-4" />
-          </button>
-        </div>
+          <div class="col-span-1 flex justify-end">
+            <button
+              @click="removeItem(index)"
+              class="mt-6 rounded-md p-2 text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors"
+              title="Remove item"
+            >
+              <Trash2 class="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div v-if="!isValidItem(index)" class="mt-2 text-sm text-red-400 ml-6">

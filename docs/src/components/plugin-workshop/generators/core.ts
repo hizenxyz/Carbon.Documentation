@@ -18,9 +18,6 @@ export function generateCoreCode(): string {
       namespace = 'Carbon.Plugins'
       break
     case 'Oxide':
-      baseClass = 'RustPlugin'
-      namespace = 'Oxide.Plugins'
-      break
     case 'Hybrid':
       baseClass = 'RustPlugin'
       namespace = 'Oxide.Plugins'

@@ -25,10 +25,8 @@ const tabsConfig = [
   {
     id: 'layout',
     name: 'Layout',
-    description: 'Visual UI components rendered with LUI (Lightweight UI). Not supported for Oxide-targeted builds.',
-    component: PluginLayout,
-    isDisabled: () => pluginData.value.pluginType === 'Oxide',
-    disabledTooltip: 'Layout builder is only available for Carbon and Hybrid plugins'
+    description: 'Visual UI components rendered with LUI (Carbon) or CuiElement (Oxide).',
+    component: PluginLayout
   }
 ]
 
@@ -40,20 +38,15 @@ const tabs = computed(() => tabsConfig.map(tab => ({
 const currentTabConfig = computed(() => tabsConfig[selectedTab.value])
 
 function selectTab(index: number) {
-  const tab = tabsConfig[index]
-  if (tab.isDisabled?.() ?? false) {
-    return
-  }
   selectedTab.value = index
 }
 
 function isTabDisabled(index: number) {
-  return tabsConfig[index].isDisabled?.() ?? false
+  return false
 }
 
 function getTabTooltip(index: number) {
-  const tab = tabsConfig[index]
-  return (tab.isDisabled?.() ?? false) ? (tab.disabledTooltip || '') : ''
+  return ''
 }
 </script>
 

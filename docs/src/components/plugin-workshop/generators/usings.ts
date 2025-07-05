@@ -1,31 +1,42 @@
 import { pluginData } from '../PluginWorkshop.Store'
 
 export function generateUsings(): string {
-  const usings: string[] = []
+  const basicUsings: string[] = []
+  const conditionalBlocks: string[] = []
   
   if (pluginData.value.settings.length > 0) {
-    usings.push('using Newtonsoft.Json;')
-    usings.push('using System;')
+    basicUsings.push('using Newtonsoft.Json;')
+    basicUsings.push('using System;')
   }
 
   switch (pluginData.value.pluginType) {
-    case 'Carbon':
-      if (pluginData.value.layout.active) {
-        usings.push('using Carbon.Components;')
+    case 'Hybrid':
+      if (pluginData.value.layout.components.length > 0) {
+        // Keep preprocessor directives as a block - don't sort these
+        conditionalBlocks.push('#if CARBON')
+        conditionalBlocks.push('using Carbon.Components;')
+        conditionalBlocks.push('#else')
+        conditionalBlocks.push('using Oxide.Game.Rust.Cui;')
+        conditionalBlocks.push('#endif')
       }
       break
-    case 'Hybrid':
-      if (pluginData.value.layout.active) {
-        usings.push('#if CARBON')
-        usings.push('using Carbon.Components;')
-        usings.push('#else')
-        usings.push('using Oxide.Ext.CarbonAliases;')
-        usings.push('#endif')
+    case 'Carbon':
+      if (pluginData.value.layout.components.length > 0) {
+        basicUsings.push('using Carbon.Components;')
+      }
+      break
+    case 'Oxide':
+      if (pluginData.value.layout.components.length > 0) {
+        basicUsings.push('using Oxide.Game.Rust.Cui;')
       }
       break
   }
   
-  const uniqueUsings = [...new Set(usings)].sort()
+  // Only sort and deduplicate the basic using statements
+  const uniqueBasicUsings = [...new Set(basicUsings)].sort()
+  
+  // Combine all parts
+  const allLines = [...uniqueBasicUsings, ...conditionalBlocks]
 
-  return uniqueUsings.length > 0 ? uniqueUsings.join('\n') : ''
+  return allLines.length > 0 ? allLines.join('\n') : ''
 }
